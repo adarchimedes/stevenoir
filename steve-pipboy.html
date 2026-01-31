@@ -110,7 +110,7 @@
             50%, 99% { opacity: 0; }
         }
 
-        /* Steve Avatar - Left Screen */
+        /* Steve Avatar Display */
         .steve-display {
             flex: 1;
             display: flex;
@@ -126,13 +126,192 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.1);
+            background: #000800;
+            position: relative;
         }
 
-        .steve-avatar img {
+        /* CRT Glowing Grid */
+        .steve-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        /* Steve Noir Skull Avatar - Pure CSS */
+        .steve-skull {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 240px;
+        }
+
+        /* Skull Shape */
+        .skull-head {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: transparent;
+            border: 3px solid #00ff00;
+            border-radius: 50% 50% 45% 45%;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+            animation: skullGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes skullGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), 0 0 40px rgba(0, 255, 0, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.6), 0 0 60px rgba(0, 255, 0, 0.2); }
+        }
+
+        /* Eyes - Glowing Cyan */
+        .skull-eye {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 20px #00ffff,
+                0 0 40px #00ffff,
+                0 0 60px rgba(0, 255, 255, 0.5),
+                inset 0 0 15px rgba(255, 255, 255, 0.3);
+            animation: eyeFlicker 3s ease-in-out infinite;
+        }
+
+        .skull-eye.left {
+            top: 55px;
+            left: 40px;
+        }
+
+        .skull-eye.right {
+            top: 55px;
+            right: 40px;
+        }
+
+        @keyframes eyeFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+            52% { opacity: 1; }
+        }
+
+        /* Eye Pupils */
+        .skull-eye::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 18px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        /* Nose */
+        .skull-nose {
+            position: absolute;
+            top: 115px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 35px solid transparent;
+            border-top: 35px solid #00ff00;
+            filter: drop-shadow(0 0 5px #00ff00);
+        }
+
+        /* Teeth */
+        .skull-teeth {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            width: 140px;
+        }
+
+        .tooth {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: grayscale(100%) contrast(1.2);
+            height: 25px;
+            background: transparent;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        /* Jaw */
+        .skull-jaw {
+            position: absolute;
+            top: 145px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 55px;
+            border: 3px solid #00ff00;
+            border-radius: 0 0 50% 50%;
+            background: transparent;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        /* Cracks */
+        .crack {
+            position: absolute;
+            background: #00ff00;
+            box-shadow: 0 0 5px #00ff00;
+        }
+
+        .crack-1 {
+            width: 2px;
+            height: 40px;
+            top: 30px;
+            right: 50px;
+            transform: rotate(15deg);
+        }
+
+        .crack-2 {
+            width: 2px;
+            height: 25px;
+            top: 60px;
+            right: 55px;
+            transform: rotate(-10deg);
+        }
+
+        .crack-3 {
+            width: 2px;
+            height: 30px;
+            top: 80px;
+            left: 45px;
+            transform: rotate(-20deg);
+        }
+
+        /* Scanline effect on avatar */
+        .steve-avatar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0, 255, 0, 0.05) 3px,
+                rgba(0, 255, 0, 0.05) 6px
+            );
+            pointer-events: none;
+            animation: scanlineMove 8s linear infinite;
+        }
+
+        @keyframes scanlineMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 300px; }
         }
 
         /* Status Indicator */
@@ -437,7 +616,26 @@
 
             <div class="steve-display">
                 <div class="steve-avatar">
-                    <img src="steve-noir-profile-01.jpg" alt="Steve Noir" onerror="this.src='steve-noir-render-01.png'">
+                    <!-- CSS Steve Noir Skull Avatar -->
+                    <div class="steve-skull">
+                        <div class="skull-head"></div>
+                        <div class="skull-eye left"></div>
+                        <div class="skull-eye right"></div>
+                        <div class="skull-nose"></div>
+                        <div class="skull-jaw"></div>
+                        <div class="skull-teeth">
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                        </div>
+                        <div class="crack crack-1"></div>
+                        <div class="crack crack-2"></div>
+                        <div class="crack crack-3"></div>
+                    </div>
                 </div>
             </div>
 
@@ -483,7 +681,7 @@
                        placeholder=">_" 
                        onkeypress="if(event.key==='Enter')sendMessage()">
                 <button class="mic-button" id="micButton" onclick="toggleMic()" title="Voice Input">🎤</button>
-                <button class="send-button" onclick="sendMessage()">SEND</button>
+                <button class="send-button" id="sendButton" onclick="sendMessage()">SEND</button>
             </div>
         </div>
     </div>
@@ -506,6 +704,7 @@
         const messagesEl = document.getElementById('messages');
         const textInput = document.getElementById('textInput');
         const micButton = document.getElementById('micButton');
+        const sendButton = document.getElementById('sendButton');
         const subtitlesEl = document.getElementById('subtitles');
         const typingIndicator = document.getElementById('typing');
         const statusEl = document.getElementById('status');
@@ -514,7 +713,13 @@
         // Initialize
         function init() {
             setupSpeechRecognition();
+            setupSendButton();
             console.log('🖤 STEVE NOIR TERMINAL READY');
+        }
+
+        // Setup Send Button (FIXED)
+        function setupSendButton() {
+            sendButton.addEventListener('click', sendMessage);
         }
 
         // Speech Recognition
@@ -584,7 +789,7 @@
             if (recognition) recognition.stop();
         }
 
-        // Send Message
+        // Send Message (FIXED)
         async function sendMessage() {
             const text = textInput.value.trim();
             if (!text) return;
