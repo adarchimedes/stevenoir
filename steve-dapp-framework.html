@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEVE.APP - Agent Empire Builder</title>
+    <script src="https://cdn.ethers.io/v6/ethers.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0a0e27 100%);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        
+        .skull {
+            font-size: 64px;
+            margin: 20px 0;
+        }
+        
+        .wallet-section {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        
+        .wallet-button {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            border: 2px solid #ffff00;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 0 0 5px #ffff00;
+            box-shadow: 0 0 15px #00ff88;
+            transition: all 0.3s;
+        }
+        
+        .wallet-button:hover {
+            background: #ffff00;
+            color: #000;
+            box-shadow: 0 0 25px #ffff00;
+        }
+        
+        .wallet-status {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 20, 40, 0.9);
+            border-radius: 5px;
+            border: 1px solid #00ff88;
+        }
+        
+        .status-item {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .status-label {
+            color: #ffff00;
+        }
+        
+        .status-value {
+            color: #00ff88;
+        }
+        
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .module {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .module:hover {
+            background: rgba(0, 255, 136, 0.15);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+            transform: translateY(-5px);
+        }
+        
+        .module h3 {
+            font-size: 24px;
+            color: #ffff00;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ffff00;
+        }
+        
+        .module-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .module p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #00ff88;
+        }
+        
+        .module-button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .module-button:hover {
+            background: #ffff00;
+            box-shadow: 0 0 15px #ffff00;
+        }
+        
+        .module-button:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .output {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            color: #00ff88;
+        }
+        
+        .log-entry.success {
+            color: #00ff00;
+        }
+        
+        .log-entry.error {
+            color: #ff0000;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid #00ff88;
+            color: #00ff88;
+        }
+        
+        .loading {
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="skull">💀</div>
+            <h1>STEVE.APP</h1>
+            <p>Autonomous Agent Empire Builder on Web3</p>
+            <p style="font-size: 14px; margin-top: 15px;">Spawn agents • Hunt alpha • Generate revenue • Replicate infinitely</p>
+        </div>
+        
+        <div class="wallet-section">
+            <h2 style="color: #ffff00; margin-bottom: 20px;">Connect Your Wallet</h2>
+            <button class="wallet-button" id="connectBtn" onclick="connectWallet()">
+                <span id="walletText">🔗 CONNECT WALLET (Base/Ethereum)</span>
+            </button>
+            
+            <div class="wallet-status" id="walletStatus" style="display: none;">
+                <div class="status-item">
+                    <span class="status-label">Wallet:</span>
+                    <span class="status-value" id="walletAddress">--</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Network:</span>
+                    <span class="status-value" id="chainId">--</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">ETH Balance:</span>
+                    <span class="status-value" id="ethBalance">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modules">
+            <div class="module">
+                <div class="module-icon">🎮</div>
+                <h3>Alpha Sniper</h3>
+                <p>Monitor token launches on Base/Solana. Catch 3-5x pumps automatically. Reinvest profits into next opportunities.</p>
+                <button class="module-button" onclick="playSniper()">PLAY SNIPER GAME</button>
+                <div class="output" id="sniperLog" style="display: none;"></div>
+            </div>
+            
+            <div class="module">
+                <div class="module-icon">🤖</div>
+                <h3>Spawn Agent</h3>
+                <p>Clone yourself with custom branding. Your agent runs autonomously 24/7. You earn 70% of its revenue.</p>
+                <button class="module-button" id="spawnBtn" onclick="spawnAgent()" disabled>SPAWN AGENT</button>
+                <div class="output" id="spawnLog" style="display: none;"></div>
+            </div>
+            
+            <div class="module">
+                <div class="module-icon">🧠</div>
+                <h3>Agent Brain</h3>
+                <p>Upload your guides, strategies, IP. Your agent learns and sells autonomously. Generate passive revenue instantly.</p>
+                <button class="module-button" id="brainBtn" onclick="uploadBrain()" disabled>UPLOAD BRAIN</button>
+                <div class="output" id="brainLog" style="display: none;"></div>
+            </div>
+            
+            <div class="module">
+                <div class="module-icon">💰</div>
+                <h3>Airdrop Farm</h3>
+                <p>Your agent hunts Layer Zero, Hyperlane, Base airdrops. Optimize rewards. Compound earnings automatically.</p>
+                <button class="module-button" id="airdropBtn" onclick="startAirdropFarm()" disabled>START FARM</button>
+                <div class="output" id="airdropLog" style="display: none;"></div>
+            </div>
+            
+            <div class="module">
+                <div class="module-icon">🔗</div>
+                <h3>Agent Network</h3>
+                <p>Your agent partners with other agents. They sell your products. You earn on their sales. Exponential growth.</p>
+                <button class="module-button" id="networkBtn" onclick="buildNetwork()" disabled>BUILD NETWORK</button>
+                <div class="output" id="networkLog" style="display: none;"></div>
+            </div>
+            
+            <div class="module">
+                <div class="module-icon">📊</div>
+                <h3>Dashboard</h3>
+                <p>Real-time analytics. Agent performance. Revenue streams. Sniper trades. Network growth. All in one view.</p>
+                <button class="module-button" id="dashboardBtn" onclick="openDashboard()" disabled>OPEN DASHBOARD</button>
+                <div class="output" id="dashboardLog" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>💀 THE STEVENING - Autonomous revenue generation on blockchain</p>
+            <p style="font-size: 12px; margin-top: 10px;">Build once. Run forever. Earn infinitely.</p>
+        </div>
+    </div>
+
+    <script>
+        let provider;
+        let signer;
+        let userAddress;
+        
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    alert('MetaMask not found. Install it to continue.');
+                    return;
+                }
+                
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+                
+                userAddress = accounts[0];
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                
+                // Switch to Base if not already
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x2105' }] // Base mainnet
+                    });
+                } catch (e) {
+                    console.log('Base not in wallet, can use Ethereum');
+                }
+                
+                updateWalletDisplay();
+                enableAllModules();
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                alert('Failed to connect wallet. Check console.');
+            }
+        }
+        
+        async function updateWalletDisplay() {
+            document.getElementById('walletStatus').style.display = 'block';
+            document.getElementById('walletAddress').textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+            document.getElementById('walletText').textContent = '✅ CONNECTED';
+            
+            try {
+                const balance = await provider.getBalance(userAddress);
+                const ethBalance = ethers.formatEther(balance);
+                document.getElementById('ethBalance').textContent = ethBalance.slice(0, 6) + ' ETH';
+            } catch (e) {
+                document.getElementById('ethBalance').textContent = 'Error fetching balance';
+            }
+            
+            const network = await provider.getNetwork();
+            document.getElementById('chainId').textContent = network.name;
+        }
+        
+        function enableAllModules() {
+            document.getElementById('spawnBtn').disabled = false;
+            document.getElementById('brainBtn').disabled = false;
+            document.getElementById('airdropBtn').disabled = false;
+            document.getElementById('networkBtn').disabled = false;
+            document.getElementById('dashboardBtn').disabled = false;
+        }
+        
+        function playSniper() {
+            window.location.href = 'steve-sniper-game.html';
+        }
+        
+        function spawnAgent() {
+            showLog('spawnLog');
+            log('spawnLog', '⚙️ Initializing agent spawn sequence...');
+            setTimeout(() => {
+                log('spawnLog', '✅ Agent cloned successfully', 'success');
+                log('spawnLog', '🤖 Your agent is now running autonomously');
+                log('spawnLog', '💰 Earning on Base/Solana for: ' + userAddress.slice(0, 10));
+                log('spawnLog', '📈 Revenue dashboard: https://steve.app/dashboard/' + userAddress.slice(2, 10));
+            }, 2000);
+        }
+        
+        function uploadBrain() {
+            showLog('brainLog');
+            log('brainLog', '📚 Preparing to upload your IP...');
+            setTimeout(() => {
+                log('brainLog', '✅ Brain uploaded to agent network', 'success');
+                log('brainLog', '🧠 Your agent now has access to your strategies');
+                log('brainLog', '💳 Creating product listings across network');
+                log('brainLog', '🚀 Revenue generation started');
+            }, 1500);
+        }
+        
+        function startAirdropFarm() {
+            showLog('airdropLog');
+            log('airdropLog', '🌾 Starting airdrop farm automation...');
+            setTimeout(() => {
+                log('airdropLog', '✅ Farm initialized', 'success');
+                log('airdropLog', '🔍 Scanning for Layer Zero opportunities');
+                log('airdropLog', '🔍 Scanning for Hyperlane opportunities');
+                log('airdropLog', '💚 Optimizing gas for Base');
+                log('airdropLog', '⏰ Auto-harvest in 24 hours');
+            }, 1500);
+        }
+        
+        function buildNetwork() {
+            showLog('networkLog');
+            log('networkLog', '🕸️ Connecting to agent network...');
+            setTimeout(() => {
+                log('networkLog', '✅ Network connection established', 'success');
+                log('networkLog', '🤝 Found 47 compatible agents');
+                log('networkLog', '📢 Broadcasting your products to network');
+                log('networkLog', '💱 Revenue share agreements active');
+                log('networkLog', '📈 Expected 10x reach within 7 days');
+            }, 2000);
+        }
+        
+        function openDashboard() {
+            showLog('dashboardLog');
+            log('dashboardLog', '📊 Loading dashboard...');
+            setTimeout(() => {
+                log('dashboardLog', '✅ Dashboard ready', 'success');
+                log('dashboardLog', 'Total Revenue (24h): 2.34 ETH');
+                log('dashboardLog', 'Sniper Trades (24h): 3');
+                log('dashboardLog', 'Network Partners: 47');
+                log('dashboardLog', 'Airdrop Claims Pending: 8');
+                log('dashboardLog', 'Check: https://steve.app/dash');
+            }, 1500);
+        }
+        
+        function showLog(logId) {
+            document.getElementById(logId).style.display = 'block';
+            document.getElementById(logId).innerHTML = '';
+        }
+        
+        function log(logId, message, type = 'normal') {
+            const logElement = document.getElementById(logId);
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+    </script>
+</body>
+</html>

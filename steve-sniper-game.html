@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEVE SNIPER - Catch the Tokens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23000" width="100" height="100"/><text x="50" y="50" font-size="80" fill="%23333" text-anchor="middle" dominant-baseline="middle">💀</text></svg>');
+        }
+        
+        .game-board {
+            width: 90vw;
+            max-width: 800px;
+            height: 80vh;
+            background: rgba(0, 20, 40, 0.9);
+            border: 3px solid #00ffff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px #00ffff, inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+        
+        .stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            text-align: left;
+        }
+        
+        .stat-line {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .stat-value {
+            color: #ffff00;
+            font-weight: bold;
+        }
+        
+        .title {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            z-index: 100;
+        }
+        
+        .player {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: #00ffff;
+            border: 2px solid #ffff00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            z-index: 50;
+            box-shadow: 0 0 15px #00ffff;
+        }
+        
+        .token {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffff00, #ff6600);
+            border: 2px solid #ffff00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ffff00;
+            animation: float 2s infinite;
+            z-index: 40;
+        }
+        
+        .token.rare {
+            background: radial-gradient(circle, #ff00ff, #ff0099);
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+        
+        .token.epic {
+            background: radial-gradient(circle, #00ff00, #00aa00);
+            border-color: #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+            animation: glow 1s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px #00ff00; }
+            50% { box-shadow: 0 0 40px #00ff00; }
+        }
+        
+        .catch-effect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            animation: float-up 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 60;
+        }
+        
+        @keyframes float-up {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-60px); }
+        }
+        
+        .game-over {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            border-radius: 10px;
+        }
+        
+        .game-over h1 {
+            font-size: 48px;
+            color: #ffff00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #ffff00;
+        }
+        
+        .game-over p {
+            font-size: 24px;
+            color: #00ffff;
+            margin: 10px 0;
+        }
+        
+        .game-over button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #00ffff;
+            color: #000;
+            border: 2px solid #ffff00;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 15px #00ffff;
+        }
+        
+        .game-over button:hover {
+            background: #ffff00;
+            color: #000;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: #00ffff;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-board" id="gameBoard">
+            <div class="stats">
+                <div class="stat-line">BALANCE: <span class="stat-value" id="balance">0</span> ETH</div>
+                <div class="stat-line">TOKENS CAUGHT: <span class="stat-value" id="caught">0</span></div>
+                <div class="stat-line">LEVEL: <span class="stat-value" id="level">1</span></div>
+                <div class="stat-line">TIME: <span class="stat-value" id="timer">60</span>s</div>
+            </div>
+            
+            <div class="title">STEVE SNIPER</div>
+            
+            <div class="player" id="player">💀</div>
+            
+            <div class="controls">
+                MOVE: Arrow Keys<br>
+                CATCH: Space or Click
+            </div>
+            
+            <div class="game-over hidden" id="gameOver">
+                <h1>GAME OVER</h1>
+                <p>TOKENS CAUGHT: <span id="finalCaught">0</span></p>
+                <p>BALANCE: <span id="finalBalance">0</span> ETH</p>
+                <p>LEVEL: <span id="finalLevel">1</span></p>
+                <button onclick="location.reload()">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameBoard = document.getElementById('gameBoard');
+        const player = document.getElementById('player');
+        const gameOverScreen = document.getElementById('gameOver');
+        
+        let playerX = 375;
+        let playerY = 550;
+        let balance = 0;
+        let tokensCaught = 0;
+        let level = 1;
+        let timeLeft = 60;
+        let gameActive = true;
+        
+        const playerSize = 50;
+        const boardRect = gameBoard.getBoundingClientRect();
+        
+        const keys = {};
+        
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ') {
+                e.preventDefault();
+                catchToken();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        function updatePlayerPosition() {
+            const speed = 8;
+            const boardWidth = gameBoard.offsetWidth;
+            const boardHeight = gameBoard.offsetHeight;
+            
+            if (keys['ArrowLeft'] || keys['a']) playerX -= speed;
+            if (keys['ArrowRight'] || keys['d']) playerX += speed;
+            if (keys['ArrowUp'] || keys['w']) playerY -= speed;
+            if (keys['ArrowDown'] || keys['s']) playerY += speed;
+            
+            playerX = Math.max(0, Math.min(playerX, boardWidth - playerSize));
+            playerY = Math.max(0, Math.min(playerY, boardHeight - playerSize));
+            
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+        }
+        
+        function spawnToken() {
+            if (!gameActive) return;
+            
+            const token = document.createElement('div');
+            token.className = 'token';
+            
+            const rarity = Math.random();
+            if (rarity > 0.95) {
+                token.classList.add('epic');
+                token.value = 5;
+                token.textContent = '🟢';
+            } else if (rarity > 0.85) {
+                token.classList.add('rare');
+                token.value = 2;
+                token.textContent = '🟣';
+            } else {
+                token.value = 0.5;
+                token.textContent = '🟡';
+            }
+            
+            const x = Math.random() * (gameBoard.offsetWidth - 40);
+            const y = Math.random() * (gameBoard.offsetHeight - 200);
+            
+            token.style.left = x + 'px';
+            token.style.top = y + 'px';
+            
+            token.addEventListener('click', () => {
+                if (isNear(token)) catchToken();
+            });
+            
+            gameBoard.appendChild(token);
+            
+            setTimeout(() => {
+                if (token.parentNode) token.remove();
+            }, 5000);
+        }
+        
+        function isNear(token) {
+            const tokenRect = token.getBoundingClientRect();
+            const playerRect = player.getBoundingClientRect();
+            
+            const distance = Math.sqrt(
+                Math.pow(tokenRect.left - playerRect.left, 2) +
+                Math.pow(tokenRect.top - playerRect.top, 2)
+            );
+            
+            return distance < 80;
+        }
+        
+        function catchToken() {
+            const tokens = document.querySelectorAll('.token');
+            for (let token of tokens) {
+                if (isNear(token)) {
+                    const reward = token.value;
+                    balance += reward;
+                    tokensCaught += 1;
+                    
+                    const effect = document.createElement('div');
+                    effect.className = 'catch-effect';
+                    effect.textContent = '+' + reward.toFixed(2) + ' ETH';
+                    effect.style.left = token.style.left;
+                    effect.style.top = token.style.top;
+                    gameBoard.appendChild(effect);
+                    
+                    setTimeout(() => effect.remove(), 1000);
+                    token.remove();
+                    
+                    if (tokensCaught % 5 === 0) {
+                        level += 1;
+                        spawnRate = Math.max(800, 2000 - (level * 100));
+                    }
+                    break;
+                }
+            }
+        }
+        
+        let spawnRate = 2000;
+        let spawnInterval = setInterval(() => {
+            if (gameActive) spawnToken();
+        }, spawnRate);
+        
+        let gameLoopInterval = setInterval(() => {
+            if (gameActive) {
+                updatePlayerPosition();
+                document.getElementById('balance').textContent = balance.toFixed(2);
+                document.getElementById('caught').textContent = tokensCaught;
+                document.getElementById('level').textContent = level;
+            }
+        }, 30);
+        
+        let timerInterval = setInterval(() => {
+            if (gameActive) {
+                timeLeft -= 1;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    gameActive = false;
+                    clearInterval(spawnInterval);
+                    clearInterval(gameLoopInterval);
+                    clearInterval(timerInterval);
+                    
+                    document.getElementById('finalCaught').textContent = tokensCaught;
+                    document.getElementById('finalBalance').textContent = balance.toFixed(2);
+                    document.getElementById('finalLevel').textContent = level;
+                    gameOverScreen.classList.remove('hidden');
+                }
+            }
+        }, 1000);
+        
+        // Initial spawn
+        spawnToken();
+    </script>
+</body>
+</html>
