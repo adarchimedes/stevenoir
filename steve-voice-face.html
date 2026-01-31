@@ -14,10 +14,10 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            background: #000;
             min-height: 100vh;
-            font-family: 'Courier New', monospace;
-            color: #e0e0e0;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            color: #0f0;
             overflow: hidden;
         }
 
@@ -27,16 +27,44 @@
             height: 100vh;
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
         }
 
-        /* Steve Face Area */
+        /* Pip-boy CRT Effect */
+        .container::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Steve Face Area - Pip-boy Screen */
         .steve-face {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 70%);
+            background: #001100;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 50px rgba(0, 255, 0, 0.1);
         }
 
         .steve-avatar {
@@ -73,14 +101,43 @@
             50% { box-shadow: 0 0 80px rgba(0, 255, 255, 0.5), 0 0 150px rgba(150, 0, 255, 0.3); }
         }
 
-        /* Chat Area */
+        /* Chat Area - Pip-boy Terminal */
         .chat-area {
             height: 350px;
-            background: rgba(10, 10, 10, 0.95);
-            border-top: 2px solid #0ff;
+            background: #001100;
+            border-top: 2px solid #00ff00;
             display: flex;
             flex-direction: column;
             padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        /* Subtitles Display - For Voice Input */
+        .subtitles {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 17, 0, 0.95);
+            border: 2px solid #00ff00;
+            padding: 15px 25px;
+            color: #00ff00;
+            font-size: 16px;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            text-shadow: 0 0 10px #00ff00;
+            display: none;
+            z-index: 1001;
+            max-width: 80%;
+        }
+
+        .subtitles.active {
+            display: block;
+            animation: subtitleGlow 1s ease infinite;
+        }
+
+        @keyframes subtitleGlow {
+            0%, 100% { text-shadow: 0 0 10px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00aa00; }
         }
 
         .chat-messages {
@@ -88,9 +145,9 @@
             overflow-y: auto;
             padding: 10px;
             margin-bottom: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border: 1px solid #333;
+            background: #000a00;
+            border: 1px solid #00ff00;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1);
         }
 
         .message {
@@ -99,6 +156,7 @@
             border-radius: 8px;
             max-width: 80%;
             animation: fadeIn 0.3s ease;
+            text-shadow: 0 0 5px #00ff00;
         }
 
         @keyframes fadeIn {
@@ -107,17 +165,19 @@
         }
 
         .message.user {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 1px solid #0ff;
+            background: rgba(0, 50, 0, 0.9);
+            border: 1px solid #00ff00;
             margin-left: auto;
             text-align: right;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
 
         .message.steve {
-            background: linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%);
-            border: 1px solid #96f;
+            background: rgba(0, 30, 0, 0.9);
+            border: 1px solid #00ff00;
             margin-right: auto;
             text-align: left;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
 
         .message .sender {
