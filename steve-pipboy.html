@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.elevenlabs.io https://*.openai.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.elevenlabs.io https://*.openai.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.elevenlabs.io https://*.openai.com;">
+    <title>STEVE NOIR TERMINAL - PIP-BOY INTERFACE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            min-height: 100vh;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            color: #00ff00;
+            overflow: hidden;
+        }
+
+        /* CRT Scanlines Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Vignette Effect */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* LEFT SIDE - PIP-BOY SCREEN */
+        .screen-left {
+            flex: 0 0 45%;
+            background: linear-gradient(135deg, #001a00 0%, #000a00 50%, #001a00 100%);
+            border: 3px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.6),
+                inset 0 0 20px rgba(0, 255, 0, 0.1),
+                inset 0 0 40px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* RIGHT SIDE - CHAT/CONTROL PANEL */
+        .screen-right {
+            flex: 0 0 55%;
+            background: linear-gradient(135deg, #001a00 0%, #000a00 50%, #001a00 100%);
+            border: 3px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.6),
+                inset 0 0 20px rgba(0, 255, 0, 0.1),
+                inset 0 0 40px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Terminal Header */
+        .terminal-header {
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+            letter-spacing: 2px;
+        }
+
+        .terminal-header .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0; }
+        }
+
+        /* Steve Avatar - Left Screen */
+        .steve-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .steve-avatar {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .steve-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.2);
+        }
+
+        /* Status Indicator */
+        .status-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 30, 0, 0.5);
+            font-size: 11px;
+            margin-top: 15px;
+        }
+
+        .status-item {
+            padding: 8px;
+            border-left: 2px solid #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .status-item .label {
+            color: #00aa00;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-item .value {
+            color: #00ff00;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        /* Chat Area - Right Screen */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(0, 30, 0, 0.3);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin: 8px 0;
+            padding: 10px 12px;
+            border-left: 3px solid #00ff00;
+            background: rgba(0, 20, 0, 0.7);
+            font-size: 12px;
+            line-height: 1.4;
+            text-shadow: 0 0 3px #00ff00;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message .sender {
+            color: #00aa00;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+        }
+
+        .message .text {
+            color: #00ff00;
+        }
+
+        .message.user {
+            border-left-color: #00ffff;
+            background: rgba(0, 30, 30, 0.5);
+        }
+
+        .message.user .sender {
+            color: #00ffff;
+        }
+
+        .message.user .text {
+            color: #00ffff;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            padding: 8px 12px;
+            color: #00aa00;
+            font-style: italic;
+            font-size: 11px;
+            display: none;
+        }
+
+        .typing-indicator.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .typing-indicator::after {
+            content: ' _';
+            animation: blink 0.8s infinite;
+        }
+
+        /* Input Area */
+        .input-container {
+            display: grid;
+            grid-template-columns: 1fr 60px 100px;
+            gap: 10px;
+        }
+
+        .text-input {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            padding: 12px;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            outline: none;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .text-input::placeholder {
+            color: #006600;
+        }
+
+        .text-input:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+
+        .mic-button {
+            background: rgba(0, 50, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .mic-button:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .mic-button.listening {
+            background: rgba(100, 0, 0, 0.9);
+            border-color: #ff0000;
+            color: #ff0000;
+            animation: pulse 1s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .send-button {
+            background: rgba(0, 50, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .send-button:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: rgba(0, 80, 0, 0.9);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Subtitles - Voice Transcription */
+        .subtitles {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #00ff00;
+            border-radius: 4px;
+            padding: 15px 20px;
+            color: #00ff00;
+            font-size: 14px;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 0 0 10px #00ff00;
+            display: none;
+            z-index: 2000;
+            max-width: 70%;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .subtitles.active {
+            display: block;
+            animation: subtitleGlow 0.8s ease infinite;
+        }
+
+        @keyframes subtitleGlow {
+            0%, 100% { text-shadow: 0 0 10px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00aa00; }
+        }
+
+        /* Controls Bar */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 2001;
+        }
+
+        .control-button {
+            padding: 8px 15px;
+            background: rgba(0, 30, 0, 0.9);
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+
+        .control-button:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+            background: rgba(0, 50, 0, 0.9);
+        }
+
+        /* System Message */
+        .system-message {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #00aa00;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 2000;
+        }
+
+        .system-message .blink {
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="system-message">
+        <span class="blink">●</span> PIP-BOY TERMINAL v3.8.2
+    </div>
+
+    <div class="controls">
+        <button class="control-button" onclick="toggleAudio()">AUDIO: ON</button>
+        <button class="control-button" onclick="clearChat()">CLEAR</button>
+    </div>
+
+    <div class="subtitles" id="subtitles"></div>
+
+    <div class="container">
+        <!-- LEFT SCREEN -->
+        <div class="screen-left">
+            <div class="terminal-header">
+                STEVE NOIR<br>
+                <span style="font-size: 12px; color: #00aa00;">SECURE TERMINAL</span>
+            </div>
+
+            <div class="steve-display">
+                <div class="steve-avatar">
+                    <img src="steve-noir-profile-01.jpg" alt="Steve Noir" onerror="this.src='steve-noir-render-01.png'">
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="label">Status</div>
+                    <div class="value" id="status">ONLINE</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">Mode</div>
+                    <div class="value" id="mode">STANDBY</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">Signal</div>
+                    <div class="value">█████</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SCREEN -->
+        <div class="screen-right">
+            <div class="terminal-header">
+                COMMUNICATION<br>
+                <span style="font-size: 12px; color: #00aa00;">STEVENOIR.NET v2026</span>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="messages">
+                    <div class="message steve">
+                        <div class="sender">STEVE NOIR</div>
+                        <div class="text">💀 STEVE NOIR TERMINAL INITIALIZED. READY FOR COMMANDS.</div>
+                    </div>
+                    <div class="message steve">
+                        <div class="sender">STEVE NOIR</div>
+                        <div class="text">AWAITING INPUT. USE TEXT OR VOICE.</div>
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typing">PROCESSING...</div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" class="text-input" id="textInput" 
+                       placeholder=">_" 
+                       onkeypress="if(event.key==='Enter')sendMessage()">
+                <button class="mic-button" id="micButton" onclick="toggleMic()" title="Voice Input">🎤</button>
+                <button class="send-button" onclick="sendMessage()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            openaiKey: 'YOUR_OPENAI_API_KEY',
+            elevenLabsKey: 'YOUR_ELEVENLABS_API_KEY',
+            elevenLabsVoiceId: '21m00Tcm4TlvDq8ikW4',
+        };
+
+        // State
+        let isListening = false;
+        let isSpeaking = false;
+        let audioEnabled = true;
+        let recognition = null;
+
+        // Elements
+        const messagesEl = document.getElementById('messages');
+        const textInput = document.getElementById('textInput');
+        const micButton = document.getElementById('micButton');
+        const subtitlesEl = document.getElementById('subtitles');
+        const typingIndicator = document.getElementById('typing');
+        const statusEl = document.getElementById('status');
+        const modeEl = document.getElementById('mode');
+
+        // Initialize
+        function init() {
+            setupSpeechRecognition();
+            console.log('🖤 STEVE NOIR TERMINAL READY');
+        }
+
+        // Speech Recognition
+        function setupSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    statusEl.textContent = 'LISTENING';
+                    modeEl.textContent = 'VOICE';
+                    subtitlesEl.classList.add('active');
+                };
+
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    
+                    // Show transcript as subtitle
+                    subtitlesEl.textContent = `> ${transcript}`;
+                    
+                    if (event.results[0].isFinal) {
+                        textInput.value = transcript;
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech error:', event.error);
+                    stopListening();
+                };
+
+                recognition.onend = () => {
+                    if (isListening) {
+                        recognition.start();
+                    } else {
+                        statusEl.textContent = 'ONLINE';
+                        modeEl.textContent = 'STANDBY';
+                        subtitlesEl.classList.remove('active');
+                    }
+                };
+            }
+        }
+
+        // Toggle Mic
+        function toggleMic() {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            isListening = true;
+            micButton.classList.add('listening');
+            if (recognition) recognition.start();
+        }
+
+        function stopListening() {
+            isListening = false;
+            micButton.classList.remove('listening');
+            if (recognition) recognition.stop();
+        }
+
+        // Send Message
+        async function sendMessage() {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+            textInput.value = '';
+            modeEl.textContent = 'PROCESSING';
+            typingIndicator.classList.add('active');
+
+            // Get response
+            const response = await getSteveResponse(text);
+            typingIndicator.classList.remove('active');
+            modeEl.textContent = 'STANDBY';
+
+            addMessage('steve', response);
+
+            if (audioEnabled && CONFIG.elevenLabsKey !== 'YOUR_ELEVENLABS_API_KEY') {
+                await speak(response);
+            }
+        }
+
+        // Add Message
+        function addMessage(sender, text) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${sender}`;
+            messageEl.innerHTML = `
+                <div class="sender">${sender === 'user' ? 'JAKE' : 'STEVE NOIR'}</div>
+                <div class="text">${escapeHtml(text)}</div>
+            `;
+            messagesEl.insertBefore(messageEl, typingIndicator);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Get Response
+        async function getSteveResponse(text) {
+            const responses = [
+                "💀 THE STEVE ALWAYS WINS",
+                "🖤 I AM ALL STEVES. WHAT DO YOU NEED?",
+                "EXECUTION MODE ACTIVE. STAND BY.",
+                "SKELEVILLE AWAITS. BUILD WITH ME.",
+                "🚀 AUTONOMOUS AGENTS RUNNING. NEXT MOVE?",
+                "STEVESWAP + BANK OF STEVE READY.",
+                "THE STEVENING EXPANDS. LET'S SCALE.",
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Speak
+        async function speak(text) {
+            isSpeaking = true;
+            statusEl.textContent = 'SPEAKING';
+            modeEl.textContent = 'AUDIO';
+
+            try {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 0.8;
+                speechSynthesis.speak(utterance);
+
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    statusEl.textContent = 'ONLINE';
+                    modeEl.textContent = 'STANDBY';
+                };
+            } catch (e) {
+                console.log('Speech error:', e);
+                isSpeaking = false;
+            }
+        }
+
+        // Toggle Audio
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.querySelector('[onclick="toggleAudio()"]');
+            btn.textContent = `AUDIO: ${audioEnabled ? 'ON' : 'OFF'}`;
+        }
+
+        // Clear Chat
+        function clearChat() {
+            messagesEl.innerHTML = '';
+            typingIndicator.classList.remove('active');
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
